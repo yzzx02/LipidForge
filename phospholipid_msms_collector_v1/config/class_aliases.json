@@ -1,0 +1,427 @@
+{
+  "version": "1.0",
+  "notes": [
+    "规则按顺序匹配；更具体的类别必须放在更通用类别之前。",
+    "linkage_modification 与 lipid_class 分开记录，避免把 plasmalogen/ether 当成头基层级。",
+    "无法可靠归类但满足含磷脂质结构筛选的记录进入 P-lipid-unresolved。"
+  ],
+  "classes": [
+    {
+      "class": "DLCL",
+      "family": "glycerophospholipid",
+      "patterns": [
+        "\\bdilysocardiolipin\\b",
+        "\\bDLCL\\b"
+      ]
+    },
+    {
+      "class": "MLCL",
+      "family": "glycerophospholipid",
+      "patterns": [
+        "\\bmonolysocardiolipin\\b",
+        "\\bMLCL\\b"
+      ]
+    },
+    {
+      "class": "CL",
+      "family": "glycerophospholipid",
+      "patterns": [
+        "\\bcardiolipin\\b",
+        "\\bCL\\s*\\("
+      ]
+    },
+    {
+      "class": "LBMP",
+      "family": "glycerophospholipid",
+      "patterns": [
+        "\\blysobis\\(monoacylglycero\\)phosphate\\b",
+        "\\blyso[- ]?BMP\\b",
+        "\\bLBMP\\b"
+      ]
+    },
+    {
+      "class": "BMP",
+      "family": "glycerophospholipid",
+      "patterns": [
+        "\\bbis\\(monoacylglycero\\)phosphate\\b",
+        "\\blysobisphosphatidic acid\\b",
+        "\\bBMP\\b"
+      ]
+    },
+    {
+      "class": "PIP3",
+      "family": "glycerophospholipid",
+      "patterns": [
+        "phosphatidylinositol[^;]*trisphosphate",
+        "\\bPIP3\\b",
+        "\\bPI\\(.*\\)P3\\b"
+      ]
+    },
+    {
+      "class": "PIP2",
+      "family": "glycerophospholipid",
+      "patterns": [
+        "phosphatidylinositol[^;]*bisphosphate",
+        "\\bPIP2\\b",
+        "\\bPI\\(.*\\)P2\\b"
+      ]
+    },
+    {
+      "class": "PIP",
+      "family": "glycerophospholipid",
+      "patterns": [
+        "phosphatidylinositol[^;]*monophosphate",
+        "\\bPIP\\b",
+        "\\bPI\\(.*\\)P\\b"
+      ]
+    },
+    {
+      "class": "CDP-DAG",
+      "family": "glycerophospholipid",
+      "patterns": [
+        "\\bCDP[- ]?(?:DAG|diacylglycerol)\\b",
+        "cytidine diphosphate diacylglycerol"
+      ]
+    },
+    {
+      "class": "PGP",
+      "family": "glycerophospholipid",
+      "patterns": [
+        "phosphatidylglycerol phosphate",
+        "\\bPGP\\b"
+      ]
+    },
+    {
+      "class": "LNAPE",
+      "family": "glycerophospholipid",
+      "patterns": [
+        "\\blyso[- ]?N[- ]?acyl.*phosphatidylethanolamine\\b",
+        "\\bLNAPE\\b"
+      ]
+    },
+    {
+      "class": "NAPE",
+      "family": "glycerophospholipid",
+      "patterns": [
+        "\\bN[- ]?acyl.*phosphatidylethanolamine\\b",
+        "\\bNAPE\\b"
+      ]
+    },
+    {
+      "class": "DMPE",
+      "family": "glycerophospholipid",
+      "patterns": [
+        "dimethyl.*phosphatidylethanolamine",
+        "\\bDMPE\\b"
+      ]
+    },
+    {
+      "class": "MMPE",
+      "family": "glycerophospholipid",
+      "patterns": [
+        "monomethyl.*phosphatidylethanolamine",
+        "\\bMMPE\\b"
+      ]
+    },
+    {
+      "class": "LPC",
+      "family": "glycerophospholipid",
+      "patterns": [
+        "\\blysophosphatidylcholine\\b",
+        "\\blyso[- ]?PC\\b",
+        "\\bLPC\\b"
+      ]
+    },
+    {
+      "class": "LPE",
+      "family": "glycerophospholipid",
+      "patterns": [
+        "\\blysophosphatidylethanolamine\\b",
+        "\\blyso[- ]?PE\\b",
+        "\\bLPE\\b"
+      ]
+    },
+    {
+      "class": "LPG",
+      "family": "glycerophospholipid",
+      "patterns": [
+        "\\blysophosphatidylglycerol\\b",
+        "\\blyso[- ]?PG\\b",
+        "\\bLPG\\b"
+      ]
+    },
+    {
+      "class": "LPI",
+      "family": "glycerophospholipid",
+      "patterns": [
+        "\\blysophosphatidylinositol\\b",
+        "\\blyso[- ]?PI\\b",
+        "\\bLPI\\b"
+      ]
+    },
+    {
+      "class": "LPS",
+      "family": "glycerophospholipid",
+      "patterns": [
+        "\\blysophosphatidylserine\\b",
+        "\\blyso[- ]?PS\\b",
+        "\\bLPS\\b"
+      ]
+    },
+    {
+      "class": "LPA",
+      "family": "glycerophospholipid",
+      "patterns": [
+        "\\blysophosphatidic acid\\b",
+        "\\blyso[- ]?PA\\b",
+        "\\bLPA\\b"
+      ]
+    },
+    {
+      "class": "PC",
+      "family": "glycerophospholipid",
+      "patterns": [
+        "\\bphosphatidylcholine\\b",
+        "\\bglycerophosphocholine\\b",
+        "\\bPC\\s*\\("
+      ]
+    },
+    {
+      "class": "PE",
+      "family": "glycerophospholipid",
+      "patterns": [
+        "\\bphosphatidylethanolamine\\b",
+        "\\bglycerophosphoethanolamine\\b",
+        "\\bPE\\s*\\("
+      ]
+    },
+    {
+      "class": "PG",
+      "family": "glycerophospholipid",
+      "patterns": [
+        "\\bphosphatidylglycerol\\b",
+        "\\bphosphatidylglyceride\\b",
+        "\\bPG\\s*\\("
+      ]
+    },
+    {
+      "class": "PI",
+      "family": "glycerophospholipid",
+      "patterns": [
+        "\\bphosphatidylinositol\\b",
+        "\\bglycerophosphoinositol\\b",
+        "\\bPI\\s*\\("
+      ]
+    },
+    {
+      "class": "PS",
+      "family": "glycerophospholipid",
+      "patterns": [
+        "\\bphosphatidylserine\\b",
+        "\\bglycerophosphoserine\\b",
+        "\\bPS\\s*\\("
+      ]
+    },
+    {
+      "class": "PA",
+      "family": "glycerophospholipid",
+      "patterns": [
+        "\\bphosphatidic acid\\b",
+        "\\bglycerophosphate\\b",
+        "\\bPA\\s*\\("
+      ]
+    },
+    {
+      "class": "PEt",
+      "family": "glycerophospholipid",
+      "patterns": [
+        "\\bphosphatidylethanol\\b",
+        "\\bPEt\\b"
+      ]
+    },
+    {
+      "class": "PMe",
+      "family": "glycerophospholipid",
+      "patterns": [
+        "\\bphosphatidylmethanol\\b",
+        "\\bPMe\\b"
+      ]
+    },
+    {
+      "class": "PPr",
+      "family": "glycerophospholipid",
+      "patterns": [
+        "\\bphosphatidylpropanol\\b",
+        "\\bPPr\\b"
+      ]
+    },
+    {
+      "class": "PBut",
+      "family": "glycerophospholipid",
+      "patterns": [
+        "\\bphosphatidylbutanol\\b",
+        "\\bPBut\\b"
+      ]
+    },
+    {
+      "class": "PT",
+      "family": "glycerophospholipid",
+      "patterns": [
+        "\\bphosphatidylthreonine\\b",
+        "\\bPT\\s*\\("
+      ]
+    },
+    {
+      "class": "PHS",
+      "family": "glycerophospholipid",
+      "patterns": [
+        "\\bphosphatidylhomoserine\\b",
+        "\\bPHS\\b"
+      ]
+    },
+    {
+      "class": "PGlc",
+      "family": "glycerophospholipid",
+      "patterns": [
+        "\\bphosphatidylglucose\\b",
+        "\\bPGlc\\b"
+      ]
+    },
+    {
+      "class": "PMan",
+      "family": "glycerophospholipid",
+      "patterns": [
+        "\\bphosphatidylmannitol\\b",
+        "\\bPMan\\b"
+      ]
+    },
+    {
+      "class": "PIM",
+      "family": "complex_bacterial_phospholipid",
+      "patterns": [
+        "phosphatidylinositol mannoside",
+        "\\bPIM[1-6]?\\b"
+      ]
+    },
+    {
+      "class": "LysoSM",
+      "family": "sphingophospholipid",
+      "patterns": [
+        "\\blysosphingomyelin\\b",
+        "\\blyso[- ]?SM\\b"
+      ]
+    },
+    {
+      "class": "SM",
+      "family": "sphingophospholipid",
+      "patterns": [
+        "\\bsphingomyelin\\b",
+        "\\bSM\\s*\\("
+      ]
+    },
+    {
+      "class": "CerP",
+      "family": "sphingophospholipid",
+      "patterns": [
+        "\\bceramide[- ]?1[- ]?phosphate\\b",
+        "\\bceramide phosphate\\b",
+        "\\bCerP\\b"
+      ]
+    },
+    {
+      "class": "dhS1P",
+      "family": "sphingophospholipid",
+      "patterns": [
+        "\\bdihydrosphingosine[- ]?1[- ]?phosphate\\b",
+        "\\bsphinganine[- ]?1[- ]?phosphate\\b",
+        "\\bdhS1P\\b"
+      ]
+    },
+    {
+      "class": "S1P",
+      "family": "sphingophospholipid",
+      "patterns": [
+        "\\bsphingosine[- ]?1[- ]?phosphate\\b",
+        "\\bS1P\\b"
+      ]
+    },
+    {
+      "class": "CerPE",
+      "family": "sphingophospholipid",
+      "patterns": [
+        "\\bceramide phosphoethanolamine\\b",
+        "\\bCPE\\b",
+        "\\bCerPE\\b"
+      ]
+    },
+    {
+      "class": "MIP2C",
+      "family": "sphingophospholipid",
+      "patterns": [
+        "mannosyldiinositolphosphorylceramide",
+        "\\bM\\(IP\\)2C\\b",
+        "\\bMIP2C\\b"
+      ]
+    },
+    {
+      "class": "MIPC",
+      "family": "sphingophospholipid",
+      "patterns": [
+        "mannosylinositolphosphorylceramide",
+        "\\bMIPC\\b"
+      ]
+    },
+    {
+      "class": "IPC",
+      "family": "sphingophospholipid",
+      "patterns": [
+        "\\binositolphosphorylceramide\\b",
+        "\\bIPC\\b"
+      ]
+    },
+    {
+      "class": "archaetidyl-phospholipid",
+      "family": "archaeal_phospholipid",
+      "patterns": [
+        "\\barchaetidyl",
+        "\\bcaldarchaetidyl",
+        "\\barchaeol phosphate\\b"
+      ]
+    },
+    {
+      "class": "phosphonolipid",
+      "family": "phosphonolipid",
+      "patterns": [
+        "\\bphosphonolipid\\b",
+        "\\bphosphono.*lipid\\b"
+      ]
+    }
+  ],
+  "linkage_modifications": [
+    {
+      "label": "plasmalogen",
+      "patterns": [
+        "\\bplasmalogen\\b",
+        "\\balkenyl\\b",
+        "\\bP-\\d"
+      ]
+    },
+    {
+      "label": "ether",
+      "patterns": [
+        "\\balkyl ether\\b",
+        "\\bether lipid\\b",
+        "\\bO-\\d"
+      ]
+    },
+    {
+      "label": "oxidized",
+      "patterns": [
+        "\\boxidized\\b",
+        "\\boxPC\\b",
+        "\\bhydroperoxy\\b",
+        "\\bhydroxy.*phosphatidyl"
+      ]
+    }
+  ]
+}
