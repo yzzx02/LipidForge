@@ -32,6 +32,13 @@ logs/
 *.ckpt
 *.onnx
 
+# Large downloaded/processed MS/MS datasets
+data/_downloads/
+data/expanded_phospholipids/
+*.zip
+*.tsv
+*.mgf
+
 # Local raw third-party data package. Only curated tiny pilot files under
 # data/pilot/ are intended for repository upload.
 glycerophospholipid_pilot_v1/

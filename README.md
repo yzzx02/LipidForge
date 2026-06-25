@@ -23,22 +23,37 @@ you remove or separately re-license those rows.
 
 ## Environment
 
-Use an existing environment that already provides PyTorch. Do not install,
-uninstall, or replace PyTorch from this project.
+Use the existing WSL + ROCm Conda environment. Do not install, uninstall, or
+replace PyTorch from this project.
 
-```text
-PyTorch is provided by the user's existing environment.
+```bash
+/home/administrator/miniconda3/bin/conda run \
+  --no-capture-output \
+  -n torch-rocm721 \
+  python train.py \
+  --config configs/smoke_test.yaml \
+  --fast-dev-run \
+  --require-gpu
 ```
 
-ROCm PyTorch still uses `torch.cuda` and `torch.device("cuda")`, so the same code
-path works for NVIDIA CUDA, AMD ROCm, and CPU fallback tests.
+The current GPU is AMD Radeon RX 9070 XT with ROCm 7.2.1. ROCm PyTorch still
+uses `torch.cuda`, `torch.device("cuda")`, and `.to("cuda")`; do not use
+`device="rocm"` or `device="hip"`.
+
+Prefer `conda run` over directly invoking the environment's Python executable.
+`conda run` loads the environment activation scripts, including the ROCDXG
+variable required by WSL:
+
+```text
+HSA_ENABLE_DXG_DETECTION=1
+```
 
 ## Quick Checks
 
 ```bash
-pytest -q
-python train.py --config configs/smoke_test.yaml --fast-dev-run
-python train.py --config configs/smoke_test.yaml --overfit-small-batch
+/home/administrator/miniconda3/bin/conda run --no-capture-output -n torch-rocm721 pytest -q
+/home/administrator/miniconda3/bin/conda run --no-capture-output -n torch-rocm721 python train.py --config configs/smoke_test.yaml --fast-dev-run --require-gpu
+/home/administrator/miniconda3/bin/conda run --no-capture-output -n torch-rocm721 python train.py --config configs/smoke_test.yaml --overfit-small-batch --require-gpu
 ```
 
 The smoke and overfit modes only verify that the data pipeline, model, losses,
@@ -46,11 +61,11 @@ and backward pass work. They are not model-performance measurements.
 
 ## Formal Training Later
 
-After adding enough real spectra, copy the project to the RX 9070 XT WSL machine
-and run:
+After adding enough real spectra, use the same Conda prefix and run formal
+baseline training only when explicitly requested:
 
 ```bash
-python train.py --config configs/baseline.yaml
+/home/administrator/miniconda3/bin/conda run --no-capture-output -n torch-rocm721 python train.py --config configs/baseline.yaml --require-gpu
 ```
 
 The baseline config keeps FP32 enabled by default. Test AMP only after standard
