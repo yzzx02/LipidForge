@@ -11,15 +11,15 @@ from torch.utils.data import Dataset
 from .labels import encode_polarity, encode_record_labels
 
 
-def _extract_peak_pairs(record: dict[str, Any]) -> list[Any]:
+def _extract_peak_pairs(record: dict[str, Any]) -> tuple[list[Any], bool]:
     if record.get("peaks_raw") is not None:
-        return list(record["peaks_raw"])
+        return list(record["peaks_raw"]), False
     if record.get("peaks") is not None:
-        return list(record["peaks"])
+        return list(record["peaks"]), False
     model_input = record.get("recommended_model_input") or {}
     if model_input.get("peaks") is not None:
-        return list(model_input["peaks"])
-    return []
+        return list(model_input["peaks"]), True
+    return [], False
 
 
 def preprocess_peaks(
@@ -36,8 +36,9 @@ def preprocess_peaks(
     if not math.isfinite(precursor_mz):
         raise ValueError("precursor_mz must be finite")
 
+    peak_pairs, already_sqrt_normalized = _extract_peak_pairs(record)
     parsed: list[tuple[float, float]] = []
-    for peak in _extract_peak_pairs(record):
+    for peak in peak_pairs:
         try:
             fragment_mz = float(peak[0])
             intensity = float(peak[1])
@@ -57,25 +58,29 @@ def preprocess_peaks(
     if max_intensity <= 0:
         raise ValueError("At least one peak intensity must be positive")
 
-    normalized = [
-        (fragment_mz, intensity / max_intensity)
-        for fragment_mz, intensity in parsed
-    ]
-    if len(normalized) > max_peaks:
-        normalized = sorted(
-            normalized,
+    if already_sqrt_normalized:
+        sqrt_normalized = parsed
+    else:
+        sqrt_normalized = [
+            (fragment_mz, math.sqrt(intensity / max_intensity))
+            for fragment_mz, intensity in parsed
+        ]
+
+    if len(sqrt_normalized) > max_peaks:
+        sqrt_normalized = sorted(
+            sqrt_normalized,
             key=lambda item: item[1],
             reverse=True,
         )[:max_peaks]
 
-    normalized = sorted(normalized, key=lambda item: item[0])
+    sqrt_normalized = sorted(sqrt_normalized, key=lambda item: item[0])
     features = [
         [
             fragment_mz / mz_scale,
-            math.sqrt(relative_intensity),
+            sqrt_intensity,
             (precursor_mz - fragment_mz) / mz_scale,
         ]
-        for fragment_mz, relative_intensity in normalized
+        for fragment_mz, sqrt_intensity in sqrt_normalized
     ]
     return torch.tensor(features, dtype=torch.float32)
 
@@ -185,11 +190,11 @@ def collate_spectra(
     label_keys = [
         "headgroup_label",
         "chain_count_label",
-        "chain_present",
         "chain_carbon_labels",
         "chain_double_bond_labels",
         "chain_linkage_labels",
         "chain_mask",
+        "chain_linkage_mask",
     ]
     for key in label_keys:
         if key in samples[0]:

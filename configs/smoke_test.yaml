@@ -24,7 +24,6 @@ training:
   pin_memory: true
   persistent_workers: false
   mixed_precision: false
-  gradient_accumulation_steps: 1
   require_gpu: false
   checkpoint_path: checkpoints/smoke_test.pt
   overfit_steps: 60

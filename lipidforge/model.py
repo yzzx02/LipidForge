@@ -69,7 +69,6 @@ class LipidTransformer(nn.Module):
 
         self.headgroup_head = nn.Linear(d_model, num_headgroups)
         self.chain_count_head = nn.Linear(d_model, 2)
-        self.chain_present_head = nn.Linear(d_model, 2)
         self.chain_carbon_head = nn.Linear(d_model, 2 * num_carbon_classes)
         self.chain_double_bond_head = nn.Linear(
             d_model,
@@ -131,7 +130,6 @@ class LipidTransformer(nn.Module):
         return {
             "headgroup_logits": self.headgroup_head(spectrum),
             "chain_count_logits": self.chain_count_head(spectrum),
-            "chain_present_logits": self.chain_present_head(spectrum),
             "chain_carbon_logits": self.chain_carbon_head(spectrum).view(
                 batch_size,
                 2,

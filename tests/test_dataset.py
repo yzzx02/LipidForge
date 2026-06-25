@@ -54,6 +54,26 @@ def test_preprocess_peaks_filters_normalizes_truncates_and_sorts():
     assert torch.allclose(features[:, 2], torch.tensor([0.8, 0.7]))
 
 
+def test_recommended_model_input_peaks_are_not_sqrt_transformed_twice():
+    raw = _record(peaks_raw=[[300.0, 9.0], [100.0, 1.0], [200.0, 4.0]])
+    recommended = _record()
+    recommended.pop("peaks_raw")
+    recommended["recommended_model_input"] = {
+        "polarity": "negative",
+        "precursor_mz": 1000.0,
+        "peaks": [[300.0, 1.0], [100.0, 1.0 / 3.0], [200.0, 2.0 / 3.0]],
+    }
+
+    raw_features = preprocess_peaks(raw, max_peaks=3, mz_scale=1000.0)
+    recommended_features = preprocess_peaks(
+        recommended,
+        max_peaks=3,
+        mz_scale=1000.0,
+    )
+
+    assert torch.allclose(raw_features, recommended_features)
+
+
 def test_empty_or_zero_peak_spectrum_raises():
     with pytest.raises(ValueError, match="No valid"):
         preprocess_peaks(_record(peaks_raw=[]))
@@ -86,8 +106,8 @@ def test_polarity_chain_sort_and_lyso_mask():
 
     assert int(sample["polarity"]) == 1
     assert int(sample["chain_count_label"]) == 0
-    assert sample["chain_present"].tolist() == [1.0, 0.0]
     assert sample["chain_mask"].tolist() == [True, False]
+    assert sample["chain_linkage_mask"].tolist() == [True, False]
     assert int(sample["chain_carbon_labels"][0]) == CARBON_TO_INDEX[16]
     assert int(sample["chain_linkage_labels"][0]) == LINKAGE_TO_INDEX["vinyl_ether"]
 
@@ -100,6 +120,31 @@ def test_polarity_chain_sort_and_lyso_mask():
     assert [(chain.carbon, chain.double_bonds) for chain in sorted_chains] == [
         (18, 1),
         (20, 4),
+    ]
+
+
+def test_double_chain_record_summary_does_not_infer_slot_linkages():
+    sample = featurize_record(_record(chain_linkage_summary="ester"))
+
+    assert sample["chain_mask"].tolist() == [True, True]
+    assert sample["chain_linkage_mask"].tolist() == [False, False]
+
+
+def test_explicit_per_chain_linkage_sets_linkage_mask():
+    sample = featurize_record(
+        _record(
+            chains=[
+                {"carbon": 18, "double_bonds": 1, "linkage": "ether"},
+                {"carbon": 20, "double_bonds": 4, "linkage": "ester"},
+            ],
+            chain_linkage_summary="ester",
+        )
+    )
+
+    assert sample["chain_linkage_mask"].tolist() == [True, True]
+    assert sample["chain_linkage_labels"].tolist() == [
+        LINKAGE_TO_INDEX["ether"],
+        LINKAGE_TO_INDEX["ester"],
     ]
 
 

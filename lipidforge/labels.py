@@ -29,19 +29,20 @@ POLARITY_TO_INDEX = {"negative": 0, "positive": 1}
 class ChainLabel:
     carbon: int
     double_bonds: int
-    linkage: str
+    linkage: str | None
+    linkage_inferred: bool = False
 
 
-def normalize_linkage(value: Any, default: str = "ester") -> str:
+def normalize_linkage(value: Any) -> str | None:
     if isinstance(value, str):
         text = value.strip().lower().replace(" ", "_").replace("-", "_")
         if text in LINKAGE_TO_INDEX:
             return text
-    return default
+    return None
 
 
-def default_linkage_from_record(record: dict[str, Any]) -> str:
-    return normalize_linkage(record.get("chain_linkage_summary"), default="ester")
+def explicit_record_linkage(record: dict[str, Any]) -> str | None:
+    return normalize_linkage(record.get("chain_linkage_summary"))
 
 
 def encode_polarity(value: Any) -> int:
@@ -53,18 +54,23 @@ def encode_polarity(value: Any) -> int:
 
 def sort_chains(
     chains: list[dict[str, Any]],
-    default_linkage: str = "ester",
+    inferred_linkage: str | None = None,
 ) -> list[ChainLabel]:
     normalized: list[ChainLabel] = []
     for chain in chains:
         carbon = int(chain["carbon"])
         double_bonds = int(chain["double_bonds"])
-        linkage = normalize_linkage(chain.get("linkage"), default=default_linkage)
+        linkage = normalize_linkage(chain.get("linkage"))
+        linkage_inferred = False
+        if linkage is None and inferred_linkage is not None:
+            linkage = inferred_linkage
+            linkage_inferred = True
         normalized.append(
             ChainLabel(
                 carbon=carbon,
                 double_bonds=double_bonds,
                 linkage=linkage,
+                linkage_inferred=linkage_inferred,
             )
         )
     return sorted(
@@ -72,7 +78,9 @@ def sort_chains(
         key=lambda item: (
             item.carbon,
             item.double_bonds,
-            LINKAGE_TO_INDEX[item.linkage],
+            LINKAGE_TO_INDEX[item.linkage]
+            if item.linkage is not None
+            else len(LINKAGES),
         ),
     )
 
@@ -82,15 +90,15 @@ def encode_record_labels(record: dict[str, Any]) -> dict[str, torch.Tensor]:
     if headgroup not in HEADGROUP_TO_INDEX:
         raise ValueError(f"Unsupported headgroup: {headgroup!r}")
 
-    chains = sort_chains(
-        list(record.get("chains") or []),
-        default_linkage=default_linkage_from_record(record),
-    )
+    raw_chains = list(record.get("chains") or [])
+    record_linkage = explicit_record_linkage(record)
+    inferred_linkage = record_linkage if len(raw_chains) == 1 else None
+    chains = sort_chains(raw_chains, inferred_linkage=inferred_linkage)
     if len(chains) not in CHAIN_COUNT_TO_INDEX:
         raise ValueError(f"Unsupported chain count: {len(chains)}")
 
-    chain_present = torch.zeros(2, dtype=torch.float32)
     chain_mask = torch.zeros(2, dtype=torch.bool)
+    chain_linkage_mask = torch.zeros(2, dtype=torch.bool)
     carbon_labels = torch.zeros(2, dtype=torch.long)
     double_bond_labels = torch.zeros(2, dtype=torch.long)
     linkage_labels = torch.zeros(2, dtype=torch.long)
@@ -101,11 +109,12 @@ def encode_record_labels(record: dict[str, Any]) -> dict[str, torch.Tensor]:
         if chain.double_bonds not in DOUBLE_BOND_TO_INDEX:
             raise ValueError(f"Double-bond count out of range: {chain.double_bonds}")
 
-        chain_present[index] = 1.0
         chain_mask[index] = True
         carbon_labels[index] = CARBON_TO_INDEX[chain.carbon]
         double_bond_labels[index] = DOUBLE_BOND_TO_INDEX[chain.double_bonds]
-        linkage_labels[index] = LINKAGE_TO_INDEX[chain.linkage]
+        if chain.linkage is not None:
+            chain_linkage_mask[index] = True
+            linkage_labels[index] = LINKAGE_TO_INDEX[chain.linkage]
 
     return {
         "headgroup_label": torch.tensor(
@@ -116,11 +125,11 @@ def encode_record_labels(record: dict[str, Any]) -> dict[str, torch.Tensor]:
             CHAIN_COUNT_TO_INDEX[len(chains)],
             dtype=torch.long,
         ),
-        "chain_present": chain_present,
         "chain_carbon_labels": carbon_labels,
         "chain_double_bond_labels": double_bond_labels,
         "chain_linkage_labels": linkage_labels,
         "chain_mask": chain_mask,
+        "chain_linkage_mask": chain_linkage_mask,
     }
 
 
@@ -162,6 +171,16 @@ def format_chain_text(chains: list[dict[str, int | str]]) -> str:
 
 def format_display_name(headgroup: str, chains: list[dict[str, int | str]]) -> str:
     return f"{headgroup}({format_chain_text(chains)})"
+
+
+def label_schema() -> dict[str, list[int] | list[str]]:
+    return {
+        "headgroups": HEADGROUPS,
+        "chain_counts": CHAIN_COUNTS,
+        "carbon_classes": CARBON_CLASSES,
+        "double_bond_classes": DOUBLE_BOND_CLASSES,
+        "linkages": LINKAGES,
+    }
 
 
 def build_structure_candidate(headgroup: str, chains: list[dict]) -> dict:

@@ -21,9 +21,69 @@ from lipidforge.model import LipidTransformer
 from train import load_simple_yaml
 
 
+MODEL_CONFIG_KEYS = {
+    "peak_feature_dim",
+    "d_model",
+    "nhead",
+    "num_layers",
+    "dim_feedforward",
+    "dropout",
+    "activation",
+    "norm_first",
+}
+PREPROCESSING_CONFIG_KEYS = {"max_peaks", "mz_scale"}
+
+
 def load_records(path: str | Path) -> list[dict[str, Any]]:
     with Path(path).open("r", encoding="utf-8") as handle:
         return [json.loads(line) for line in handle if line.strip()]
+
+
+def _check_config_conflicts(
+    external_model_config: dict[str, Any],
+    checkpoint_model_config: dict[str, Any],
+    checkpoint_preprocessing_config: dict[str, Any],
+) -> None:
+    conflicts: list[str] = []
+    for key in sorted(MODEL_CONFIG_KEYS):
+        if (
+            key in checkpoint_model_config
+            and key in external_model_config
+            and checkpoint_model_config[key] != external_model_config[key]
+        ):
+            conflicts.append(
+                f"model.{key}: checkpoint={checkpoint_model_config[key]!r}, "
+                f"external={external_model_config[key]!r}"
+            )
+    for key in sorted(PREPROCESSING_CONFIG_KEYS):
+        if (
+            key in checkpoint_preprocessing_config
+            and key in external_model_config
+            and checkpoint_preprocessing_config[key] != external_model_config[key]
+        ):
+            conflicts.append(
+                f"preprocessing.{key}: "
+                f"checkpoint={checkpoint_preprocessing_config[key]!r}, "
+                f"external={external_model_config[key]!r}"
+            )
+    if conflicts:
+        joined = "; ".join(conflicts)
+        raise ValueError(f"External config conflicts with checkpoint: {joined}")
+
+
+def _build_model_from_config(config: dict[str, Any]) -> LipidTransformer:
+    return LipidTransformer(
+        peak_feature_dim=int(config.get("peak_feature_dim", 3)),
+        d_model=int(config.get("d_model", 128)),
+        nhead=int(config.get("nhead", 4)),
+        num_layers=int(config.get("num_layers", 4)),
+        dim_feedforward=int(config.get("dim_feedforward", 256)),
+        dropout=float(config.get("dropout", 0.10)),
+        activation=str(config.get("activation", "gelu")),
+        norm_first=bool(config.get("norm_first", True)),
+        max_peaks=int(config.get("max_peaks", 200)),
+        mz_scale=float(config.get("mz_scale", 1000.0)),
+    )
 
 
 def main() -> None:
@@ -37,9 +97,31 @@ def main() -> None:
     args = parser.parse_args()
 
     config = load_simple_yaml(args.config)
-    model_config = config.get("model", {})
-    max_peaks = int(model_config.get("max_peaks", 200))
-    mz_scale = float(model_config.get("mz_scale", 1000.0))
+    external_model_config = config.get("model", {})
+    model_config = dict(external_model_config)
+    preprocessing_config = {
+        "max_peaks": int(model_config.get("max_peaks", 200)),
+        "mz_scale": float(model_config.get("mz_scale", 1000.0)),
+    }
+    checkpoint: dict[str, Any] | None = None
+    state: dict[str, torch.Tensor] | None = None
+    if args.checkpoint:
+        checkpoint = torch.load(args.checkpoint, map_location="cpu")
+        state = checkpoint.get("model_state_dict", checkpoint)
+        checkpoint_model_config = checkpoint.get("model_config") or {}
+        checkpoint_preprocessing_config = checkpoint.get("preprocessing_config") or {}
+        _check_config_conflicts(
+            external_model_config,
+            checkpoint_model_config,
+            checkpoint_preprocessing_config,
+        )
+        model_config.update(checkpoint_model_config)
+        preprocessing_config.update(checkpoint_preprocessing_config)
+
+    max_peaks = int(preprocessing_config.get("max_peaks", 200))
+    mz_scale = float(preprocessing_config.get("mz_scale", 1000.0))
+    model_config["max_peaks"] = max_peaks
+    model_config["mz_scale"] = mz_scale
     threshold = (
         args.confidence_threshold
         if args.confidence_threshold is not None
@@ -47,21 +129,8 @@ def main() -> None:
     )
 
     device = torch.device("cpu") if args.cpu else resolve_device(require_gpu=False)
-    model = LipidTransformer(
-        peak_feature_dim=int(model_config.get("peak_feature_dim", 3)),
-        d_model=int(model_config.get("d_model", 128)),
-        nhead=int(model_config.get("nhead", 4)),
-        num_layers=int(model_config.get("num_layers", 4)),
-        dim_feedforward=int(model_config.get("dim_feedforward", 256)),
-        dropout=float(model_config.get("dropout", 0.10)),
-        activation=str(model_config.get("activation", "gelu")),
-        norm_first=bool(model_config.get("norm_first", True)),
-        max_peaks=max_peaks,
-        mz_scale=mz_scale,
-    ).to(device)
-    if args.checkpoint:
-        checkpoint = torch.load(args.checkpoint, map_location=device)
-        state = checkpoint.get("model_state_dict", checkpoint)
+    model = _build_model_from_config(model_config).to(device)
+    if state is not None:
         model.load_state_dict(state)
     else:
         print(

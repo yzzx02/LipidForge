@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import argparse
-import math
 from pathlib import Path
 from typing import Any
 
@@ -10,6 +9,7 @@ from torch.utils.data import DataLoader
 
 from lipidforge.dataset import LipidSpectrumDataset, make_collate_fn
 from lipidforge.environment import print_environment_info, resolve_device
+from lipidforge.labels import label_schema
 from lipidforge.losses import compute_losses
 from lipidforge.model import LipidTransformer, count_parameters
 
@@ -71,11 +71,11 @@ def print_batch_shapes(batch: dict[str, Any], outputs: dict[str, torch.Tensor]) 
         "polarity",
         "headgroup_label",
         "chain_count_label",
-        "chain_present",
         "chain_carbon_labels",
         "chain_double_bond_labels",
         "chain_linkage_labels",
         "chain_mask",
+        "chain_linkage_mask",
     ]:
         if key in batch:
             print(f"  {key}: {tuple(batch[key].shape)}")
@@ -96,13 +96,16 @@ def build_loader(
     num_workers: int,
     device: torch.device,
     max_peaks: int,
+    pin_memory: bool,
+    persistent_workers: bool,
 ) -> DataLoader:
+    use_persistent_workers = persistent_workers and num_workers > 0
     loader_kwargs: dict[str, Any] = {
         "batch_size": batch_size,
         "shuffle": shuffle,
         "num_workers": num_workers,
-        "pin_memory": device.type == "cuda",
-        "persistent_workers": num_workers > 0,
+        "pin_memory": pin_memory,
+        "persistent_workers": use_persistent_workers,
         "collate_fn": make_collate_fn(max_peaks=max_peaks),
     }
     if num_workers > 0:
@@ -139,6 +142,8 @@ def print_run_header(
     print(f"Trainable parameters: {trainable_params}")
     print(f"Batch size: {training_config.get('batch_size')}")
     print(f"Max peaks: {model_config.get('max_peaks', 200)}")
+    print(f"Pin memory: {training_config.get('pin_memory')}")
+    print(f"Persistent workers: {training_config.get('persistent_workers')}")
     print(f"AMP enabled: {use_amp}")
 
 
@@ -252,6 +257,8 @@ def run_regular_training(
     gradient_clip_norm: float,
     epochs: int,
     checkpoint_path: str | None,
+    model_config: dict[str, Any],
+    preprocessing_config: dict[str, Any],
 ) -> None:
     for epoch in range(1, epochs + 1):
         model.train()
@@ -279,7 +286,15 @@ def run_regular_training(
     if checkpoint_path:
         path = Path(checkpoint_path)
         path.parent.mkdir(parents=True, exist_ok=True)
-        torch.save({"model_state_dict": model.state_dict()}, path)
+        torch.save(
+            {
+                "model_state_dict": model.state_dict(),
+                "model_config": dict(model_config),
+                "preprocessing_config": dict(preprocessing_config),
+                "label_schema": label_schema(),
+            },
+            path,
+        )
         loaded = torch.load(path, map_location=device)
         model.load_state_dict(loaded["model_state_dict"])
         print(f"Checkpoint saved and loaded: {path}")
@@ -306,7 +321,7 @@ def main() -> None:
     dataset = LipidSpectrumDataset(
         data_config.get(
             "train_jsonl",
-            "glycerophospholipid_pilot_v1/experimental_ms2_pilot.jsonl",
+            "data/pilot/experimental_ms2_pilot.jsonl",
         ),
         max_peaks=max_peaks,
         mz_scale=mz_scale,
@@ -322,6 +337,8 @@ def main() -> None:
         num_workers=int(training_config.get("num_workers", 0)),
         device=device,
         max_peaks=max_peaks,
+        pin_memory=bool(training_config.get("pin_memory", device.type == "cuda")),
+        persistent_workers=bool(training_config.get("persistent_workers", False)),
     )
 
     model = build_model(model_config).to(device)
@@ -370,6 +387,11 @@ def main() -> None:
             gradient_clip_norm,
             epochs=int(training_config.get("epochs", 2)),
             checkpoint_path=training_config.get("checkpoint_path"),
+            model_config=model_config,
+            preprocessing_config={
+                "max_peaks": max_peaks,
+                "mz_scale": mz_scale,
+            },
         )
     except RuntimeError as exc:
         message = str(exc).lower()

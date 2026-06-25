@@ -39,7 +39,6 @@ def test_cpu_batch_forward_shapes():
 
     assert outputs["headgroup_logits"].shape == (2, 6)
     assert outputs["chain_count_logits"].shape == (2, 2)
-    assert outputs["chain_present_logits"].shape == (2, 2)
     assert outputs["chain_carbon_logits"].shape == (2, 2, 39)
     assert outputs["chain_double_bond_logits"].shape == (2, 2, 13)
     assert outputs["chain_linkage_logits"].shape == (2, 2, 3)
