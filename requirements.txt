@@ -1,0 +1,5 @@
+# PyTorch is provided by the user's existing environment.
+#
+# The first baseline intentionally avoids extra runtime dependencies.
+# Install pytest only if the active environment does not already provide it.
+pytest

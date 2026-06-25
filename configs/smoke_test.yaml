@@ -1,0 +1,30 @@
+data:
+  train_jsonl: data/pilot/experimental_ms2_pilot.jsonl
+
+model:
+  peak_feature_dim: 3
+  d_model: 128
+  nhead: 4
+  num_layers: 4
+  dim_feedforward: 256
+  dropout: 0.10
+  activation: gelu
+  norm_first: true
+  max_peaks: 200
+  mz_scale: 1000.0
+  confidence_threshold: 0.50
+
+training:
+  batch_size: 2
+  epochs: 2
+  learning_rate: 3.0e-4
+  weight_decay: 1.0e-4
+  gradient_clip_norm: 1.0
+  num_workers: 0
+  pin_memory: true
+  persistent_workers: false
+  mixed_precision: false
+  gradient_accumulation_steps: 1
+  require_gpu: false
+  checkpoint_path: checkpoints/smoke_test.pt
+  overfit_steps: 60

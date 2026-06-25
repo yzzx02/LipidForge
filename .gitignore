@@ -1,0 +1,41 @@
+# Python caches
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Virtual environments and local package caches
+.venv/
+venv/
+env/
+.conda/
+
+# Notebooks and IDE state
+.ipynb_checkpoints/
+.idea/
+.vscode/
+
+# Secrets and local environment files
+.env
+.env.*
+
+# Training artifacts
+checkpoints/
+outputs/
+logs/
+*.pt
+*.pth
+*.ckpt
+*.onnx
+
+# Local raw third-party data package. Only curated tiny pilot files under
+# data/pilot/ are intended for repository upload.
+glycerophospholipid_pilot_v1/
+
+# OS files
+.DS_Store
+Thumbs.db
