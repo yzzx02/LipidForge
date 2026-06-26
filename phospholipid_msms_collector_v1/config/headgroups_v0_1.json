@@ -1,0 +1,255 @@
+{
+  "schema_version": "headgroups_v0_1",
+  "version": "0.1",
+  "parser_version": "gpl_v0.1",
+  "source": "phase3a2_user_headgroup_table_draft",
+  "supported_lipid_classes": [
+    "PA",
+    "PC",
+    "PE",
+    "PG",
+    "PI",
+    "PS",
+    "LPA",
+    "LPC",
+    "LPE",
+    "LPG",
+    "LPI",
+    "LPS"
+  ],
+  "unsupported_lipid_classes": [
+    "SM",
+    "LysoSM",
+    "S1P",
+    "CerP",
+    "NAPE",
+    "LNAPE",
+    "GNAPE",
+    "BMP",
+    "HBMP",
+    "CL",
+    "MLCL",
+    "DLCL",
+    "PIP",
+    "PIP2",
+    "IPC",
+    "MIPC",
+    "archaeal lipids",
+    "phosphonolipids"
+  ],
+  "deferred_invalid_abbreviations": [
+    "AC3PIM2",
+    "AC4PIM2"
+  ],
+  "headgroups": [
+    {
+      "headgroup_id": "phosphate",
+      "version": "0.1",
+      "user_supplied_smiles": [
+        "O=P(O)(O)"
+      ],
+      "canonical_variants": [
+        "O=[PH](O)O"
+      ],
+      "charge_normalized_variants": [
+        "O=P([O-])(O)"
+      ],
+      "phosphorus_count": 1,
+      "allowed_attachment_count": 1,
+      "applicable_abbreviations": [
+        "PA",
+        "LPA",
+        "S1P",
+        "CerP"
+      ],
+      "review_status": "user_supplied",
+      "notes": "PA/LPA/S1P/CerP may share the phosphate core; backbone topology distinguishes them."
+    },
+    {
+      "headgroup_id": "phosphocholine",
+      "version": "0.1",
+      "user_supplied_smiles": [
+        "C[N+](C)(C)CCOP([O-])(=O)"
+      ],
+      "canonical_variants": [
+        "C[N+](C)(C)CCO[PH](=O)[O-]"
+      ],
+      "charge_normalized_variants": [
+        "C[N+](C)(C)CCO[PH](=O)O"
+      ],
+      "phosphorus_count": 1,
+      "allowed_attachment_count": 1,
+      "applicable_abbreviations": [
+        "PC",
+        "LPC",
+        "oPC",
+        "pPC",
+        "oLPC",
+        "pLPC",
+        "SM",
+        "LysoSM",
+        "CerPC"
+      ],
+      "review_status": "user_supplied"
+    },
+    {
+      "headgroup_id": "phosphoethanolamine",
+      "version": "0.1",
+      "user_supplied_smiles": [
+        "NCCOP(O)(=O)"
+      ],
+      "canonical_variants": [
+        "NCCO[PH](=O)O"
+      ],
+      "charge_normalized_variants": [
+        "[NH3+]CCO[PH](=O)[O-]"
+      ],
+      "phosphorus_count": 1,
+      "allowed_attachment_count": 1,
+      "applicable_abbreviations": [
+        "PE",
+        "LPE",
+        "oPE",
+        "pPE",
+        "oLPE",
+        "pLPE",
+        "NAPE",
+        "LNAPE",
+        "GNAPE"
+      ],
+      "review_status": "user_supplied",
+      "notes": "N-acyl PE-like structures require full topology and are not parsed as ordinary PE in v0.1."
+    },
+    {
+      "headgroup_id": "n_methyl_phosphoethanolamine",
+      "version": "0.1",
+      "user_supplied_smiles": [
+        "N(C)CCOP(O)(=O)"
+      ],
+      "canonical_variants": [
+        "CNCCO[PH](=O)O"
+      ],
+      "charge_normalized_variants": [],
+      "phosphorus_count": 1,
+      "allowed_attachment_count": 1,
+      "applicable_abbreviations": [
+        "MMPE"
+      ],
+      "review_status": "user_supplied"
+    },
+    {
+      "headgroup_id": "n_dimethyl_phosphoethanolamine",
+      "version": "0.1",
+      "user_supplied_smiles": [
+        "N(C)(C)CCOP(O)(=O)"
+      ],
+      "canonical_variants": [
+        "CN(C)CCO[PH](=O)O"
+      ],
+      "charge_normalized_variants": [],
+      "phosphorus_count": 1,
+      "allowed_attachment_count": 1,
+      "applicable_abbreviations": [
+        "DMPE"
+      ],
+      "review_status": "user_supplied"
+    },
+    {
+      "headgroup_id": "phosphomethanol",
+      "version": "0.1",
+      "user_supplied_smiles": [
+        "O=P(OC)(O)"
+      ],
+      "canonical_variants": [
+        "CO[PH](=O)O"
+      ],
+      "charge_normalized_variants": [],
+      "phosphorus_count": 1,
+      "allowed_attachment_count": 1,
+      "applicable_abbreviations": [
+        "PMe"
+      ],
+      "review_status": "user_supplied"
+    },
+    {
+      "headgroup_id": "phosphoethanol",
+      "version": "0.1",
+      "user_supplied_smiles": [
+        "O=P(OCC)(O)"
+      ],
+      "canonical_variants": [
+        "CCO[PH](=O)O"
+      ],
+      "charge_normalized_variants": [],
+      "phosphorus_count": 1,
+      "allowed_attachment_count": 1,
+      "applicable_abbreviations": [
+        "PEt"
+      ],
+      "review_status": "user_supplied"
+    },
+    {
+      "headgroup_id": "phosphoglycerol",
+      "version": "0.1",
+      "user_supplied_smiles": [
+        "OCC(O)COP(=O)(O)"
+      ],
+      "canonical_variants": [
+        "O=[PH](O)OCC(O)CO"
+      ],
+      "charge_normalized_variants": [],
+      "phosphorus_count": 1,
+      "allowed_attachment_count": 1,
+      "applicable_abbreviations": [
+        "PG",
+        "LPG",
+        "BMP",
+        "HBMP"
+      ],
+      "review_status": "user_supplied",
+      "notes": "PG/BMP/HBMP require glycerol topology and chain attachment positions."
+    },
+    {
+      "headgroup_id": "phosphoinositol",
+      "version": "0.1",
+      "user_supplied_smiles": [
+        "OC1C(O)C(O)C(O)C(O)C1OP(O)(=O)"
+      ],
+      "canonical_variants": [
+        "O=[PH](O)OC1C(O)C(O)C(O)C(O)C1O"
+      ],
+      "charge_normalized_variants": [],
+      "phosphorus_count": 1,
+      "allowed_attachment_count": 1,
+      "applicable_abbreviations": [
+        "PI",
+        "LPI",
+        "oPI"
+      ],
+      "review_status": "user_supplied"
+    },
+    {
+      "headgroup_id": "phosphoserine",
+      "version": "0.1",
+      "user_supplied_smiles": [
+        "[O-]C(=O)C([NH3+])COP(O)(=O)"
+      ],
+      "canonical_variants": [
+        "[NH3+]C(CO[PH](=O)O)C(=O)[O-]"
+      ],
+      "charge_normalized_variants": [
+        "NC(CO[PH](=O)O)C(=O)O"
+      ],
+      "phosphorus_count": 1,
+      "allowed_attachment_count": 1,
+      "applicable_abbreviations": [
+        "PS",
+        "LPS",
+        "oPS",
+        "pPS"
+      ],
+      "review_status": "user_supplied",
+      "notes": "Neutral and zwitterionic serine phosphate are the same headgroup in parser v0.1."
+    }
+  ]
+}
