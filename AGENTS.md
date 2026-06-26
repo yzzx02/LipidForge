@@ -23,9 +23,20 @@
 - Do not use `/usr/bin/python3`.
 - Do not use the Miniconda base Python.
 - Do not invoke `/home/administrator/miniconda3/envs/torch-rocm721/bin/python` directly for GPU tasks, because direct execution may bypass the environment activation scripts required by ROCDXG.
-- Do not create a new Conda environment.
+- Do not create additional Conda environments without explicit user approval.
 - Do not install, uninstall, replace, or upgrade PyTorch, ROCm, CUDA, HIP, AMD drivers, or system GPU packages without explicit user approval.
 - Do not use `pip install`, `conda install`, or `apt install` without explicit user approval.
+
+## Structure chemistry environment
+
+- Use `torch-rocm721` only for model training, GPU checks, and PyTorch workflows.
+- Use the independent CPU Conda environment `lipidforge-chem` for RDKit structure normalization and reference-structure matching.
+- The canonical RDKit command prefix is:
+
+  `/home/administrator/miniconda3/bin/conda run --no-capture-output -n lipidforge-chem`
+
+- Do not install RDKit into `torch-rocm721` without explicit user approval.
+- Do not run model training or GPU workloads from `lipidforge-chem`.
 
 ## ROCm behavior
 

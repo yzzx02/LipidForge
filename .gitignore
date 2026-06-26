@@ -35,6 +35,9 @@ logs/
 # Large downloaded/processed MS/MS datasets
 data/_downloads/
 data/expanded_phospholipids/
+data/expanded_phospholipids_v2/
+data/reference/lipidmaps/
+data/structure_labeling/
 *.zip
 *.tsv
 *.mgf

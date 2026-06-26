@@ -68,6 +68,14 @@ python scripts/collect_phospholipid_msms.py `
 - `summary.json`
 - `class_counts.csv`
 
+## v2 结构标识输出
+
+使用 `--schema-version v2` 时，采集器会保留全部 acquisition 记录，并额外输出结构标准化字段、`peak_identity_hash`、`acquisition_metadata_hash`、`acquisition_record_hash` 与 `duplicate_relation`。
+
+- `removable_exact_duplicate` 只表示同一 `acquisition_record_hash` 的重复记录，可由可选的 `phospholipid_msms_acquisition_dedup_v2.jsonl` 视图去除。
+- `same_source_acquisition_duplicate_candidate` 表示同一来源、同一峰身份和同一采集元数据，但不同 `source_record_id` 的候选重复；它不是安全删除标签。
+- 结构标签阶段只把 LIPID MAPS 匹配结果写入 `data/structure_labeling/` 派生目录，不回写第三方原始 acquisition 记录。
+
 ## 重要原则
 
 - 保留不同碰撞能和仪器产生的谱，但删除完全相同的峰表副本。
