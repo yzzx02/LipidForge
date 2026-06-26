@@ -78,7 +78,12 @@ python scripts/collect_phospholipid_msms.py `
 
 ## 重要原则
 
-- 保留不同碰撞能和仪器产生的谱，但删除完全相同的峰表副本。
+- v2 默认保留全部 acquisition 记录。
+- 峰表相同的记录会进入 duplicate group，但不会仅因峰表相同而删除。
+- 不同碰撞能、仪器、来源或 `source_record_id` 的记录必须保留其 provenance。
+- `same_source_acquisition_duplicate_candidate` 只是候选重复，不是安全删除标签。
+- 只有同一 `acquisition_record_hash` 的 `removable_exact_duplicate` 才能在可选 acquisition-dedup 视图中去除。
+- v1 的 peak-only dedup 输出仅保留作历史对比，不应作为 v2 数据生成策略。
 - 训练/验证/测试必须按分子结构分组，不能随机按谱图行切分。
 - `MassSpecGym` 的未解析候选不能直接作为 PC/PE/PG 等监督标签。
 - 每条记录保留来源和许可证；未经许可核对，不把大规模第三方谱图提交到公开 GitHub。
