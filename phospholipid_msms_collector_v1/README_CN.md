@@ -76,6 +76,14 @@ python scripts/collect_phospholipid_msms.py `
 - `same_source_acquisition_duplicate_candidate` 表示同一来源、同一峰身份和同一采集元数据，但不同 `source_record_id` 的候选重复；它不是安全删除标签。
 - 结构标签阶段只把 LIPID MAPS 匹配结果写入 `data/structure_labeling/` 派生目录，不回写第三方原始 acquisition 记录。
 
+## 典型甘油磷脂结构解析器 v0.1
+
+结构解析器 v0.1 只根据分子图/SMILES 解析典型甘油磷脂，不读取 `lipid_class`、名称、abbreviation 或来源标签来决定类别。当前支持 PA/PC/PE/PG/PI/PS 及对应 lyso 类，输出头基、glycerol backbone、链、free hydroxyl、linkage multiset、分区和重构检查。
+
+`ester`、`alkyl_ether` 和 `vinyl_ether` 是链连接属性，不是独立头基；lyso 类由链数量派生。范围外结构会明确返回 unsupported 状态，例如 sphingoid backbone、SM/S1P/CerP、NAPE、BMP/CL、多磷拓扑、C-methyl/额外骨架取代以及复杂 PIP/IPC/古菌脂质/膦脂。
+
+Phase 3B v0.1 验收口径固定为：strict structures 814，Phase 3B eligible 785，图解析并 reconstruction exact 为 776，其中 734 条与 strict 标签一致并作为 gold v0.1，41 条是 parser-derived high-confidence label-disagreement candidates，需要后续人工审核，不能自动回写 strict 数据。派生报告、图片、JSONL/CSV 结果和本地数据不进入 Git。
+
 ## 重要原则
 
 - v2 默认保留全部 acquisition 记录。
