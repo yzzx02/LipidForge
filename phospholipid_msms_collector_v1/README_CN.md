@@ -84,6 +84,12 @@ python scripts/collect_phospholipid_msms.py `
 
 Phase 3B v0.1 验收口径固定为：strict structures 814，Phase 3B eligible 785，图解析并 reconstruction exact 为 776，其中 734 条与 strict 标签一致并作为 gold v0.1，41 条是 parser-derived high-confidence label-disagreement candidates，需要后续人工审核，不能自动回写 strict 数据。派生报告、图片、JSONL/CSV 结果和本地数据不进入 Git。
 
+## Gold Curation v0.1
+
+Gold v0.1 只固化 strict 标签与结构解析器 v0.1 图解析结果一致的记录：734 个结构、731 个 connectivity、1758 条 acquisition。acquisition 保留原始 provenance，不按峰表去重，也不把同一结构的多张谱合并成一条。
+
+41 条 label-disagreement candidates 不进入 gold v0.1，只作为后续人工审核候选。人工批准后的修订必须进入新的 gold/label 版本，不能静默覆盖 v0.1。后续训练或评估 split 必须按 `connectivity_id` 分组；未来加入实际样品时还必须保留 `sample_id`、证据类型、审核人、审核日期、支持谱图和注释说明等 provenance。
+
 ## 重要原则
 
 - v2 默认保留全部 acquisition 记录。
